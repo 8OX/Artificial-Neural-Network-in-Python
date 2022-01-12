@@ -1,13 +1,11 @@
 import numpy as np
-import nnfs
 from nnfs.datasets import spiral_data
 import nnfs
-import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+
 
 # Our dense layer will begin with two methods
-
-
 class Layer_Dense:
 
     def __init__(self, n_inputs, n_neurons):
@@ -20,11 +18,24 @@ class Layer_Dense:
         self.output = np.dot(inputs, self.weights) + self.biases
 
 
-# create dataset
-X, y = spiral_data(samples=100, classes=3)
+class Activation_ReLU:
 
-# dense layer with 2 input features (layers) and 3 output values (neurons per layer)
-dense1 = Layer_Dense(2, 3)
+    def forward(self, inputs):
+        # Calculate output values from inputs
+        self.output = np.maximum(0, inputs)
 
-# perform a forward pass of our training data through this layer
-dense1.forward(X)
+# softmax activatation
+
+
+class Activation_Softmax:
+
+    # forward pass
+    def forward(self, inputs):
+
+        # Get unnormalized probabilities
+        exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
+
+        # Normalize them for each sample
+        probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
+
+        self.output = probabilities
