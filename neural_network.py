@@ -17,12 +17,27 @@ class Layer_Dense:
         # Calculate output values from inputs, weights and biases
         self.output = np.dot(inputs, self.weights) + self.biases
 
+    def backward(self, dvalues):
+        # Gradients on parameters
+        self.dweights = np.dot(self.inputs.T, dvalues)
+        self.dbiases = np.sum(dvalues, self.weights.T)
+        # Gradient on values
+        self.dinput = np.dot(dvalues, self.weights.T)
+
 
 class Activation_ReLU:
 
     def forward(self, inputs):
         # Calculate output values from inputs
         self.output = np.maximum(0, inputs)
+
+    def backward(self, dvalues):
+        # Since the original values will be modifed, 
+        # a copy is made
+        self.dinputs = dvalues.copy()
+
+        # Zero gradient where input values were negative
+        self.dinputs[self.inputs <= 0] = 0
 
 class Activation_Softmax:
 
@@ -72,10 +87,10 @@ class CategoricalCrossEntropy(Loss):
             correct_confidences = y_pred_clipped[range(samples), y_true]
         # Mask values - only for one-hot encoded labels
         elif len(class_targets.shape) == 2:
-        correct_confidences = np.sum(
-            y_pred_clipped * y_true,
-            axis=1
-        )
+            correct_confidences = np.sum(
+                y_pred_clipped * y_true,
+                axis=1
+            )
 
         # Losses
         negative_log_likelihoods = -np.log(correct_confidences)
